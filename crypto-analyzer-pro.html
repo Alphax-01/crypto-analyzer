@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crypto Analyzer Pro</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#080810;color:#e2e8f0;font-family:'JetBrains Mono',monospace;min-height:100vh}
+  .gate{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+  .gate-card{background:#0d0d18;border:1px solid #1e1e2e;border-radius:16px;padding:32px 24px;width:100%;max-width:380px;text-align:center}
+  .gate-card h1{font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:6px}
+  .gate-card p{font-size:11px;color:#334155;margin-bottom:24px}
+  .key-input{width:100%;background:#080810;border:1px solid #1e1e2e;border-radius:8px;color:#e2e8f0;padding:12px 14px;font-size:13px;font-family:inherit;outline:none;text-align:center;letter-spacing:2px;margin-bottom:12px}
+  .key-input:focus{border-color:#6366f1}
+  .btn-enter{width:100%;background:#1e1b4b;border:1px solid #6366f1;border-radius:8px;color:#a5b4fc;padding:12px;font-size:13px;font-family:inherit;cursor:pointer;font-weight:600}
+  .err-msg{background:#2d0a0a;border:1px solid #7f1d1d;border-radius:8px;padding:10px;color:#f87171;font-size:12px;margin-top:10px;display:none}
+  .app{display:none;padding:16px}
+  .wrap{max-width:620px;margin:0 auto}
+  .chip{cursor:pointer;padding:7px 14px;border-radius:7px;border:1px solid #1e1e2e;background:#0f0f1a;color:#64748b;font-size:12px;font-family:inherit;transition:all .15s;white-space:nowrap}
+  .chip:hover{border-color:#4f46e5;color:#a5b4fc}
+  .chip.on{background:#1e1b4b;border-color:#6366f1;color:#c7d2fe}
+  .row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px}
+  .sr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;margin-bottom:6px;background:#0d0d18;border:1px solid #191928;gap:8px}
+  .pill{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+  .bull{background:#052e16;color:#4ade80;border:1px solid #166534}
+  .bear{background:#2d0a0a;color:#f87171;border:1px solid #7f1d1d}
+  .neutral{background:#1c1707;color:#fbbf24;border:1px solid #78350f}
+  .sc{background:#0d0d18;border:1px solid #191928;border-radius:10px;padding:12px 14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+  .main-card{background:#0d0d18;border-radius:14px;padding:18px 20px;margin-bottom:13px}
+  input.ci{width:100%;background:#0d0d18;border:1px solid #1e1e2e;border-radius:8px;color:#e2e8f0;padding:9px 13px;font-size:12px;font-family:inherit;outline:none}
+  input.ci:focus{border-color:#6366f1}
+  .expiry-bar{background:#0d0d18;border:1px solid #1e1e2e;border-radius:10px;padding:10px 14px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade{animation:fadeUp .35s ease}
+  .dot{width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;animation:pulse 2s infinite}
+  .spinner{width:28px;height:28px;border:2px solid #1e1e2e;border-top:2px solid #6366f1;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+</style>
+</head>
+<body>
+
+<!-- LICENSE GATE -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div style="font-size:28px;margin-bottom:12px">🔐</div>
+    <h1>Crypto Analyzer Pro</h1>
+    <p>Enter your license key to access</p>
+    <input class="key-input" id="keyInput" placeholder="CRY-XXXX-XXXX-XXXX" maxlength="19"
+      onkeydown="if(event.key==='Enter')verify()"/>
+    <button class="btn-enter" onclick="verify()">Activate</button>
+    <div class="err-msg" id="errMsg"></div>
+    <p style="font-size:10px;color:#1e293b;margin-top:20px">Contact your provider for a key</p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app" id="app">
+<div class="wrap">
+  <div style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div class="dot"></div>
+      <span style="font-size:10px;color:#10b981;letter-spacing:2px;text-transform:uppercase">Live Signal · Kraken</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <h1 style="font-size:20px;font-weight:700;color:#f1f5f9;letter-spacing:-.5px;margin-bottom:2px">Crypto Analyzer Pro</h1>
+        <p style="font-size:11px;color:#334155">RSI · MACD · BB · EMA · Stoch · Volume · 30s</p>
+      </div>
+      <div class="expiry-bar" style="margin:0;padding:6px 10px">
+        <span style="font-size:9px;color:#334155">License<br><span id="expiryShow" style="color:#4ade80;font-size:10px"></span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="coins"></div>
+  <div style="display:flex;gap:8px;margin-bottom:13px">
+    <input class="ci" id="customInput" placeholder="Custom coin e.g. LINK, DOT…" onkeydown="if(event.key==='Enter')goCustom()"/>
+    <button class="chip on" onclick="goCustom()">Go</button>
+  </div>
+  <div class="flex" style="display:flex;align-items:center;gap:6px;margin-bottom:20px;flex-wrap:wrap">
+    <div class="row" id="ivls" style="margin-bottom:0"></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+      <button id="autoBtn" onclick="toggleAuto()" style="border-radius:6px;padding:6px 12px;font-size:10px;font-family:inherit;cursor:pointer;background:#052e16;border:1px solid #166534;color:#4ade80">AUTO ON</button>
+      <svg id="ring" width="36" height="36" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="14" fill="none" stroke="#1e1e2e" stroke-width="3"/>
+        <circle id="arc" cx="18" cy="18" r="14" fill="none" stroke="#6366f1" stroke-width="3"
+          stroke-dasharray="87.96 87.96" stroke-linecap="round" transform="rotate(-90 18 18)"
+          style="transition:stroke-dasharray 1s linear"/>
+        <text id="ringTxt" x="18" y="22" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">30s</text>
+      </svg>
+      <button onclick="loadData()" style="background:#0d0d18;border:1px solid #1e1e2e;border-radius:6px;color:#64748b;padding:6px 12px;font-size:14px;font-family:inherit;cursor:pointer">⟳</button>
+    </div>
+  </div>
+  <div id="output"></div>
+</div>
+</div>
+
+<script>
+const SUPA_URL = "https://sunsombjshqmxrfgbejl.supabase.co";
+const SUPA_KEY = "sb_publishable_IwTIXbfjl1FiKL5JQ66VsA_plIqOWt3";
+
+// ── LICENSE VERIFY ─────────────────────────────────────────────────────────
+async function verify() {
+  const key = document.getElementById("keyInput").value.trim().toUpperCase();
+  const errEl = document.getElementById("errMsg");
+  errEl.style.display = "none";
+  if(!key){ showErr("Key daalo pehle!"); return; }
+
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/licenses?key=eq.${key}&select=*`, {
+      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+    });
+    const data = await res.json();
+    if(!data.length){ showErr("❌ Invalid key — apne provider se contact karo"); return; }
+    const lic = data[0];
+    if(!lic.is_active){ showErr("❌ Yeh key disabled hai"); return; }
+    const exp = new Date(lic.expires_at);
+    if(exp < new Date()){ showErr("❌ Key expire ho gayi — renew karo"); return; }
+
+    // Access granted!
+    localStorage.setItem("lic_key", key);
+    localStorage.setItem("lic_exp", lic.expires_at);
+    localStorage.setItem("lic_name", lic.client_name);
+    document.getElementById("gate").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("expiryShow").textContent = "Expires: " + lic.expires_at;
+    initApp();
+  } catch(e) {
+    showErr("Connection error: " + e.message);
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById("errMsg");
+  el.textContent = msg; el.style.display = "block";
+}
+
+// Check saved key on load
+window.onload = async function() {
+  const saved = localStorage.getItem("lic_key");
+  if(saved) {
+    document.getElementById("keyInput").value = saved;
+    await verify();
+  }
+};
+
+// ── TECHNICAL ANALYSIS ────────────────────────────────────────────────────
+function ema(data,p){const k=2/(p+1);const o=[data[0]];for(let i=1;i<data.length;i++)o.push(data[i]*k+o[i-1]*(1-k));return o;}
+function rsi(c,p=14){if(c.length<p+1)return null;let ag=0,al=0;for(let i=1;i<=p;i++){const d=c[i]-c[i-1];if(d>=0)ag+=d;else al-=d;}ag/=p;al/=p;for(let i=p+1;i<c.length;i++){const d=c[i]-c[i-1];ag=(ag*(p-1)+Math.max(d,0))/p;al=(al*(p-1)+Math.max(-d,0))/p;}return al===0?100:100-100/(1+ag/al);}
+function macd(c){if(c.length<26)return null;const e12=ema(c,12),e26=ema(c,26),ml=e12.map((v,i)=>v-e26[i]),sig=ema(ml.slice(25),9),last=ml[ml.length-1],ls=sig[sig.length-1];return{macd:last,signal:ls,histogram:last-ls};}
+function bb(c,p=20){if(c.length<p)return null;const sl=c.slice(-p),mean=sl.reduce((a,b)=>a+b,0)/p,std=Math.sqrt(sl.reduce((a,b)=>a+(b-mean)**2,0)/p);return{upper:mean+2*std,middle:mean,lower:mean-2*std};}
+function atr(ca,p=14){if(ca.length<p+1)return null;const trs=[];for(let i=1;i<ca.length;i++){const h=ca[i].high,l=ca[i].low,pc=ca[i-1].close;trs.push(Math.max(h-l,Math.abs(h-pc),Math.abs(l-pc)));}return trs.slice(-p).reduce((a,b)=>a+b,0)/p;}
+function stoch(ca,k=14){if(ca.length<k)return null;const sl=ca.slice(-k),hi=Math.max(...sl.map(c=>c.high)),lo=Math.min(...sl.map(c=>c.low));return((sl[sl.length-1].close-lo)/(hi-lo))*100;}
+
+function analyze(candles){
+  const closes=candles.map(c=>c.close),last=closes[closes.length-1],prev=closes[closes.length-2];
+  const r=rsi(closes),m=macd(closes),b=bb(closes),at=atr(candles),st=stoch(candles);
+  const e20=ema(closes,20),e50=ema(closes,50),le20=e20[e20.length-1],le50=e50[e50.length-1];
+  const sigs=[];let bull=0,bear=0;
+  if(r!==null){if(r<30){sigs.push({l:"RSI",m:`Oversold (${r.toFixed(1)})`,t:"bull"});bull+=2;}else if(r>70){sigs.push({l:"RSI",m:`Overbought (${r.toFixed(1)})`,t:"bear"});bear+=2;}else sigs.push({l:"RSI",m:`Neutral (${r.toFixed(1)})`,t:"neutral"});}
+  if(m){if(m.histogram>0){sigs.push({l:"MACD",m:"Bullish crossover",t:"bull"});bull+=2;}else if(m.histogram<0){sigs.push({l:"MACD",m:"Bearish crossover",t:"bear"});bear+=2;}else sigs.push({l:"MACD",m:"No clear signal",t:"neutral"});}
+  if(b){if(last<b.lower){sigs.push({l:"BB",m:"Below lower — bounce likely",t:"bull"});bull+=1;}else if(last>b.upper){sigs.push({l:"BB",m:"Above upper — pullback likely",t:"bear"});bear+=1;}else sigs.push({l:"BB",m:`Inside bands (${((last-b.lower)/(b.upper-b.lower)*100).toFixed(0)}%)`,t:"neutral"});}
+  if(last>le20&&le20>le50){sigs.push({l:"EMA",m:"Strong uptrend",t:"bull"});bull+=2;}else if(last<le20&&le20<le50){sigs.push({l:"EMA",m:"Strong downtrend",t:"bear"});bear+=2;}else sigs.push({l:"EMA",m:"Mixed / sideways",t:"neutral"});
+  if(st!==null){if(st<20){sigs.push({l:"Stoch",m:`Oversold (${st.toFixed(1)})`,t:"bull"});bull+=1;}else if(st>80){sigs.push({l:"Stoch",m:`Overbought (${st.toFixed(1)})`,t:"bear"});bear+=1;}else sigs.push({l:"Stoch",m:`Neutral (${st.toFixed(1)})`,t:"neutral"});}
+  const avgVol=candles.slice(-20).reduce((a,c)=>a+c.volume,0)/20,lVol=candles[candles.length-1].volume,volUp=last>prev;
+  if(lVol>avgVol*1.5){sigs.push({l:"Volume",m:`Spike +${((lVol/avgVol-1)*100).toFixed(0)}% above avg`,t:volUp?"bull":"bear"});if(volUp)bull+=1;else bear+=1;}else sigs.push({l:"Volume",m:"Normal — no spike",t:"neutral"});
+  const total=bull+bear;let verdict,conf,color;
+  if(!total){verdict="HOLD";conf=50;color="#f59e0b";}else{const rat=bull/total;if(rat>=0.65){verdict="BUY";conf=Math.round(rat*100);color="#10b981";}else if(rat<=0.35){verdict="SELL";conf=Math.round((1-rat)*100);color="#ef4444";}else{verdict="HOLD";conf=50;color="#f59e0b";}}
+  return{sigs,verdict,conf,color,rsi:r,macd:m,bb:b,atr:at,stoch:st,ema20:le20,ema50:le50,bull,bear,support:b?b.lower:Math.min(...closes.slice(-20)),resistance:b?b.upper:Math.max(...closes.slice(-20)),change:((last-closes[0])/closes[0])*100,last};
+}
+
+function buildChart(candles,bb){
+  const W=560,H=150,closes=candles.map(c=>c.close),mn=Math.min(...closes)*.999,mx=Math.max(...closes)*1.001;
+  const ty=v=>H-((v-mn)/(mx-mn))*H,tx=i=>(i/(closes.length-1))*W;
+  const path=closes.map((v,i)=>`${i===0?"M":"L"} ${tx(i).toFixed(1)} ${ty(v).toFixed(1)}`).join(" ");
+  const area=path+` L ${W} ${H} L 0 ${H} Z`,up=closes[closes.length-1]>=closes[0],c=up?"#10b981":"#ef4444";
+  let bbL="";if(bb){bbL=`<line x1="0" x2="${W}" y1="${ty(bb.upper).toFixed(1)}" y2="${ty(bb.upper).toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="4 4" opacity=".5"/><line x1="0" x2="${W}" y1="${ty(bb.middle).toFixed(1)}" y2="${ty(bb.middle).toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="2 6" opacity=".3"/><line x1="0" x2="${W}" y1="${ty(bb.lower).toFixed(1)}" y2="${ty(bb.lower).toFixed(1)}" stroke="#818cf8" stroke-width="1" stroke-dasharray="4 4" opacity=".5"/>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:150px"><defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${c}" stop-opacity=".3"/><stop offset="100%" stop-color="${c}" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#cg)"/><path d="${path}" fill="none" stroke="${c}" stroke-width="2"/>${bbL}<circle cx="${tx(closes.length-1).toFixed(1)}" cy="${ty(closes[closes.length-1]).toFixed(1)}" r="4" fill="${c}"/></svg>`;
+}
+
+const COINS=["BTC","ETH","SOL","XRP","ADA","DOGE","AVAX","BNB","DOT","LINK","LTC","MATIC"];
+const IVLS=["1m","3m","5m","15m","1h","4h","1d"];
+const IVL_MINS={"1m":1,"3m":3,"5m":5,"15m":15,"1h":60,"4h":240,"1d":1440};
+const KRAKEN_MAP={BTC:"XBTUSD",ETH:"ETHUSD",SOL:"SOLUSD",XRP:"XRPUSD",ADA:"ADAUSD",DOGE:"XDGUSD",AVAX:"AVAXUSD",BNB:"BNBUSD",DOT:"DOTUSD",LINK:"LINKUSD",MATIC:"MATICUSD",LTC:"LTCUSD"};
+const REFRESH=30;
+let selCoin="BTC",selIvl="5m",autoOn=true,countdown=REFRESH,timerInterval=null,countInterval=null,candles=[];
+
+function fmt(n){return n>=1?n.toLocaleString("en-US",{maximumFractionDigits:2}):n.toFixed(6);}
+
+function initApp(){
+  const el1=document.getElementById("coins");
+  el1.innerHTML=COINS.map(c=>`<button class="chip${c===selCoin?" on":""}" onclick="selectCoin('${c}')">${c}</button>`).join("");
+  const el2=document.getElementById("ivls");
+  el2.innerHTML=IVLS.map(i=>`<button class="chip${i===selIvl?" on":""}" onclick="selectIvl('${i}')">${i}</button>`).join("");
+  startAuto(); loadData();
+}
+
+function selectCoin(c){selCoin=c;document.getElementById("coins").querySelectorAll(".chip").forEach((b,i)=>b.className="chip"+(COINS[i]===c?" on":""));loadData();}
+function selectIvl(i){selIvl=i;document.getElementById("ivls").querySelectorAll(".chip").forEach((b,j)=>b.className="chip"+(IVLS[j]===i?" on":""));loadData();}
+function goCustom(){const v=document.getElementById("customInput").value.trim().toUpperCase().replace("USDT","").replace("USD","");if(v){selCoin=v;document.getElementById("customInput").value="";loadData();}}
+
+function startAuto(){
+  clearInterval(timerInterval);clearInterval(countInterval);
+  countdown=REFRESH;updateRing();
+  timerInterval=setInterval(()=>{loadData(true);countdown=REFRESH;},REFRESH*1000);
+  countInterval=setInterval(()=>{countdown=Math.max(0,countdown-1);updateRing();},1000);
+}
+function toggleAuto(){
+  autoOn=!autoOn;
+  const btn=document.getElementById("autoBtn");
+  if(autoOn){btn.style.background="#052e16";btn.style.borderColor="#166534";btn.style.color="#4ade80";btn.textContent="AUTO ON";startAuto();}
+  else{btn.style.background="#1a1a2e";btn.style.borderColor="#2a2a3a";btn.style.color="#475569";btn.textContent="AUTO OFF";clearInterval(timerInterval);clearInterval(countInterval);}
+}
+function updateRing(){const circ=87.96,prog=(countdown/REFRESH)*circ;document.getElementById("arc").setAttribute("stroke-dasharray",`${prog} ${circ}`);document.getElementById("ringTxt").textContent=countdown+"s";}
+
+async function loadData(silent=false){
+  if(!silent)document.getElementById("output").innerHTML=`<div style="text-align:center;padding:50px"><div class="spinner"></div><p style="color:#334155;font-size:11px">Fetching ${selCoin} · ${selIvl}…</p></div>`;
+  try{
+    const pair=KRAKEN_MAP[selCoin]||(selCoin+"USD"),mins=IVL_MINS[selIvl]||60;
+    const res=await fetch(`https://api.kraken.com/0/public/OHLC?pair=${pair}&interval=${mins}`);
+    if(!res.ok)throw new Error("API error");
+    const json=await res.json();
+    if(json.error&&json.error.length)throw new Error(json.error[0]);
+    const key=Object.keys(json.result).find(k=>k!=="last");
+    candles=json.result[key].map(r=>({time:r[0]*1000,open:+r[1],high:+r[2],low:+r[3],close:+r[4],volume:+r[6]}));
+    const result=analyze(candles);
+    showResult(result,candles);
+  }catch(e){document.getElementById("output").innerHTML=`<div style="background:#2d0a0a;border:1px solid #7f1d1d;border-radius:10px;padding:13px;color:#f87171;font-size:12px">⚠ ${e.message}</div>`;}
+}
+
+function showResult(r,candles){
+  const now=new Date().toLocaleTimeString();
+  document.getElementById("output").innerHTML=`<div class="fade">
+    <div class="main-card" style="border:1px solid ${r.color}35;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:10px;color:#334155;margin-bottom:5px">${selCoin}/USD · ${selIvl.toUpperCase()}</div>
+        <div style="font-size:26px;font-weight:700;color:#f1f5f9">$${fmt(r.last)}</div>
+        <div style="font-size:11px;color:${r.change>=0?"#10b981":"#ef4444"};margin-top:4px">${r.change>=0?"▲":"▼"} ${Math.abs(r.change).toFixed(2)}%</div>
+        <div style="font-size:9px;color:#1e293b;margin-top:6px">Updated: ${now}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:30px;font-weight:700;color:${r.color};text-shadow:0 0 24px ${r.color}50;letter-spacing:2px">${r.verdict}</div>
+        <div style="font-size:11px;color:#475569;margin-top:3px">${r.conf}% confidence</div>
+        <div style="display:flex;gap:10px;margin-top:8px;justify-content:center">
+          <span style="font-size:11px;color:#4ade80">▲ ${r.bull}</span>
+          <span style="font-size:11px;color:#f87171">▼ ${r.bear}</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="sc" style="border-color:#10b98130"><div style="font-size:9px;color:#334155;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Support</div><div style="font-size:15px;font-weight:700;color:#10b981">$${fmt(r.support)}</div></div>
+      <div class="sc" style="border-color:#ef444430"><div style="font-size:9px;color:#334155;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">Resistance</div><div style="font-size:15px;font-weight:700;color:#ef4444">$${fmt(r.resistance)}</div></div>
+    </div>
+    <div class="sc" style="margin-bottom:13px;padding:14px 14px 8px">${buildChart(candles.slice(-80),r.bb)}<div style="display:flex;gap:14px;margin-top:6px;justify-content:flex-end"><span style="font-size:9px;color:#818cf8">— BB Bands</span><span style="font-size:9px;color:${r.change>=0?"#10b981":"#ef4444"}">— Price</span></div></div>
+    <div style="font-size:9px;color:#1e293b;margin-bottom:9px;letter-spacing:2px;text-transform:uppercase">Signal Breakdown</div>
+    ${r.sigs.map(s=>`<div class="sr"><span style="font-size:12px;color:#64748b;min-width:70px">${s.l}</span><span style="font-size:11px;color:#334155;flex:1;text-align:center">${s.m}</span><span class="pill ${s.t}">${s.t==="bull"?"↑ BULL":s.t==="bear"?"↓ BEAR":"→ HOLD"}</span></div>`).join("")}
+    <div class="grid3" style="margin-top:12px">
+      ${[{l:"RSI (14)",v:r.rsi?.toFixed(1)??"—"},{l:"MACD",v:r.macd?r.macd.histogram.toFixed(4):"—"},{l:"Stoch %K",v:r.stoch?.toFixed(1)??"—"},{l:"EMA 20",v:r.ema20?fmt(r.ema20):"—"},{l:"EMA 50",v:r.ema50?fmt(r.ema50):"—"},{l:"ATR (14)",v:r.atr?fmt(r.atr):"—"}].map(s=>`<div class="sc"><div style="font-size:9px;color:#1e293b;margin-bottom:4px;letter-spacing:1px">${s.l}</div><div style="font-size:13px;font-weight:600;color:#94a3b8">${s.v}</div></div>`).join("")}
+    </div>
+    <p style="font-size:9px;color:#1e293b;text-align:center;margin-top:10px">⚠ Not financial advice · DYOR</p>
+  </div>`;
+}
+</script>
+</body>
+</html>

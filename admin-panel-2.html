@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — License Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#080810;color:#e2e8f0;font-family:'JetBrains Mono',monospace;padding:20px;min-height:100vh}
+  .wrap{max-width:600px;margin:0 auto}
+  h1{font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:4px}
+  p.sub{font-size:11px;color:#334155;margin-bottom:24px}
+  .card{background:#0d0d18;border:1px solid #1e1e2e;border-radius:14px;padding:20px;margin-bottom:16px}
+  .card h2{font-size:13px;color:#94a3b8;margin-bottom:14px;letter-spacing:1px;text-transform:uppercase}
+  label{font-size:11px;color:#475569;display:block;margin-bottom:5px;margin-top:12px}
+  input{width:100%;background:#080810;border:1px solid #1e1e2e;border-radius:8px;color:#e2e8f0;padding:9px 13px;font-size:12px;font-family:inherit;outline:none}
+  input:focus{border-color:#6366f1}
+  .btn{width:100%;margin-top:14px;background:#1e1b4b;border:1px solid #6366f1;border-radius:8px;color:#a5b4fc;padding:10px;font-size:12px;font-family:inherit;cursor:pointer;font-weight:600}
+  .btn:hover{background:#2d2a6b}
+  .btn.red{background:#2d0a0a;border-color:#7f1d1d;color:#f87171}
+  .btn.green{background:#052e16;border-color:#166534;color:#4ade80}
+  .license-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:8px;background:#080810;border:1px solid #191928;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+  .badge{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+  .active{background:#052e16;color:#4ade80;border:1px solid #166534}
+  .expired{background:#2d0a0a;color:#f87171;border:1px solid #7f1d1d}
+  .msg{padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;display:none}
+  .msg.ok{background:#052e16;color:#4ade80;border:1px solid #166534}
+  .msg.err{background:#2d0a0a;color:#f87171;border:1px solid #7f1d1d}
+  .copy-btn{background:#1e1b4b;border:1px solid #6366f1;border-radius:5px;color:#a5b4fc;padding:3px 8px;font-size:10px;font-family:inherit;cursor:pointer}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spin{width:16px;height:16px;border:2px solid #1e1e2e;border-top:2px solid #6366f1;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+    <div style="width:7px;height:7px;border-radius:50%;background:#6366f1;box-shadow:0 0 6px #6366f1"></div>
+    <span style="font-size:10px;color:#6366f1;letter-spacing:2px;text-transform:uppercase">Admin Panel</span>
+  </div>
+  <h1>License Manager</h1>
+  <p class="sub">Crypto Analyzer — Client Key System</p>
+
+  <!-- Generate Key -->
+  <div class="card">
+    <h2>New License Key</h2>
+    <label>Client Name</label>
+    <input id="clientName" placeholder="e.g. Rahul Sharma"/>
+    <label>Expiry Date</label>
+    <input id="expiryDate" type="date"/>
+    <button class="btn" onclick="generateKey()">Generate & Save Key</button>
+    <div class="msg" id="genMsg"></div>
+  </div>
+
+  <!-- Active Licenses -->
+  <div class="card">
+    <h2>All Licenses</h2>
+    <button class="btn" style="margin-top:0;margin-bottom:14px" onclick="loadLicenses()">Refresh List</button>
+    <div id="licenseList"><p style="font-size:12px;color:#334155">Click Refresh to load...</p></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = "https://sunsombjshqmxrfgbejl.supabase.co";
+const SUPA_KEY = "sb_publishable_IwTIXbfjl1FiKL5JQ66VsA_plIqOWt3";
+
+function headers() {
+  return {
+    "Content-Type": "application/json",
+    "apikey": SUPA_KEY,
+    "Authorization": "Bearer " + SUPA_KEY
+  };
+}
+
+function randomKey() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let k = "CRY-";
+  for(let i=0;i<4;i++){
+    for(let j=0;j<4;j++) k += chars[Math.floor(Math.random()*chars.length)];
+    if(i<3) k+="-";
+  }
+  return k;
+}
+
+function showMsg(id, msg, ok) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = "msg " + (ok ? "ok" : "err");
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 4000);
+}
+
+async function generateKey() {
+  const name = document.getElementById("clientName").value.trim();
+  const exp  = document.getElementById("expiryDate").value;
+  if(!name || !exp) { showMsg("genMsg","Client name aur expiry dono bharo!",false); return; }
+
+  const key = randomKey();
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/licenses`, {
+      method: "POST",
+      headers: {...headers(), "Prefer": "return=representation"},
+      body: JSON.stringify({ key, client_name: name, expires_at: exp, is_active: true })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    showMsg("genMsg", `✅ Key: ${key} — saved!`, true);
+    document.getElementById("clientName").value = "";
+    document.getElementById("expiryDate").value = "";
+    loadLicenses();
+  } catch(e) {
+    showMsg("genMsg", "Error: " + e.message, false);
+  }
+}
+
+async function loadLicenses() {
+  const el = document.getElementById("licenseList");
+  el.innerHTML = `<div style="text-align:center;padding:20px"><span class="spin"></span><span style="font-size:11px;color:#334155">Loading...</span></div>`;
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/licenses?order=id.desc`, { headers: headers() });
+    const data = await res.json();
+    if(!data.length){ el.innerHTML=`<p style="font-size:12px;color:#334155">Koi license nahi abhi</p>`; return; }
+    el.innerHTML = data.map(l => {
+      const expired = new Date(l.expires_at) < new Date();
+      const status  = !l.is_active ? "Disabled" : expired ? "Expired" : "Active";
+      const cls     = status==="Active" ? "active" : "expired";
+      return `<div class="license-row">
+        <div>
+          <div style="font-size:12px;color:#94a3b8;font-weight:600">${l.client_name}</div>
+          <div style="font-size:11px;color:#334155;margin-top:2px">${l.key}</div>
+          <div style="font-size:10px;color:#1e293b;margin-top:2px">Expires: ${l.expires_at}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <span class="badge ${cls}">${status}</span>
+          <button class="copy-btn" onclick="copyKey('${l.key}')">Copy Key</button>
+          ${l.is_active ? `<button class="copy-btn" style="color:#f87171;border-color:#7f1d1d" onclick="toggleKey(${l.id}, false)">Disable</button>` : `<button class="copy-btn" style="color:#4ade80;border-color:#166534" onclick="toggleKey(${l.id}, true)">Enable</button>`}
+        </div>
+      </div>`;
+    }).join("");
+  } catch(e) {
+    el.innerHTML=`<p style="font-size:12px;color:#f87171">Error: ${e.message}</p>`;
+  }
+}
+
+async function toggleKey(id, active) {
+  await fetch(`${SUPA_URL}/rest/v1/licenses?id=eq.${id}`, {
+    method: "PATCH",
+    headers: headers(),
+    body: JSON.stringify({ is_active: active })
+  });
+  loadLicenses();
+}
+
+function copyKey(key) {
+  navigator.clipboard.writeText(key);
+  alert("Key copied: " + key);
+}
+
+// Set default expiry to 1 month from now
+const d = new Date(); d.setMonth(d.getMonth()+1);
+document.getElementById("expiryDate").value = d.toISOString().split("T")[0];
+</script>
+</body>
+</html>
